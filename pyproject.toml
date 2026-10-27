@@ -1,0 +1,36 @@
+[project]
+name = "ibi-portfolio-mcp"
+version = "0.1.0"
+description = "Read-only MCP server for IBI (Israel Brokerage & Investments) portfolios: positions, cash, P/L and account activity for Claude, ChatGPT, Cursor and other AI assistants."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "Kobi Mantzur" }]
+keywords = ["mcp", "mcp-server", "model-context-protocol", "ibi", "israel", "broker", "portfolio", "stocks",
+            "claude", "read-only", "orbis", "nextgen"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Office/Business :: Financial :: Investment",
+  "Intended Audience :: End Users/Desktop",
+]
+dependencies = [
+  "mcp>=2.1",
+  "playwright>=1.45",
+  "python-dotenv>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/kobimantzur/ibi-portfolio-mcp"
+
+[project.scripts]
+ibi-portfolio-mcp = "ibi_portfolio_mcp.server:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
