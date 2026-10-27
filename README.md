@@ -81,7 +81,7 @@ Then **close the terminal and open a new one**.
 
 **2. Install IBI Portfolio MCP:**
 ```bash
-uv tool install https://github.com/kobimantzur/ibi-portfolio-mcp/archive/refs/heads/main.zip
+uv tool install ibi-portfolio-mcp
 ```
 
 **3. Run the guided setup:**
@@ -316,7 +316,7 @@ A read takes about 30 to 60 seconds. If IBI changes its website this can break; 
 | `IBI_PASS_CMD failed` | Run that command in a terminal; it must print only the password |
 | `IbiOtpRequired` | Set `IBI_HEADED=1` and type the SMS code in the window |
 | `login did not reach the IBI home page` | Wrong username or password, or IBI shows a notice. Try `IBI_HEADED=1 ibi-portfolio-mcp check` to watch |
-| Update to the latest version | `uv tool install --force https://github.com/kobimantzur/ibi-portfolio-mcp/archive/refs/heads/main.zip` |
+| Update to the latest version | `uv tool upgrade ibi-portfolio-mcp` |
 
 ## For developers
 
