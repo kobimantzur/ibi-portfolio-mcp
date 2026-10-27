@@ -35,6 +35,9 @@ async def _snapshot(refresh: bool) -> Snapshot:
         snap = _cache["snap"]
         if snap is not None and not refresh and time.time() - _cache["at"] < CACHE_TTL_S:
             return snap
+        if os.getenv("IBI_DEMO", "") in ("1", "true", "yes"):
+            from .demo import demo_snapshot
+            return demo_snapshot()
         user, password = get_credentials()
         snap = await asyncio.to_thread(
             fetch, user, password,

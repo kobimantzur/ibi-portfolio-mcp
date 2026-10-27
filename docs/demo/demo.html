@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- Source for docs/demo.gif. Re-record with: uv run python docs/demo/record.py
+     The answer text is a real reply from Claude Sonnet to the IBI_DEMO=1 portfolio (made-up numbers). -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>IBI Portfolio MCP demo</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --ink:#1f1e1c; --muted:#6b6862; --line:#e4e1da; --user:#1f3a5f; --green:#1a7f4b; --red:#b42318; --chip:#eef3f8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); font:16px/1.45 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); }
+  .frame { width:820px; height:520px; padding:22px 26px; display:flex; flex-direction:column; gap:14px; overflow:hidden; }
+  .top { display:flex; align-items:center; justify-content:space-between; }
+  .title { font-weight:650; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .dot { width:10px; height:10px; border-radius:50%; background:var(--green); }
+  .badge { font-size:12px; color:#7a4b00; background:#fff3d6; border:1px solid #f0d9a2; padding:3px 9px; border-radius:999px; }
+  .msg { max-width:85%; padding:12px 16px; border-radius:16px; opacity:0; transform:translateY(6px); transition:all .35s ease; }
+  .msg.show { opacity:1; transform:none; }
+  .user { align-self:flex-end; background:var(--user); color:#fff; border-bottom-right-radius:4px; font-size:17px; }
+  .tool { align-self:flex-start; background:var(--chip); border:1px solid #d6e2ee; color:#24425f; font-size:14px; border-radius:10px; padding:9px 13px; display:flex; gap:9px; align-items:center; }
+  .spin { width:14px; height:14px; border:2px solid #9fb6cc; border-top-color:#24425f; border-radius:50%; animation:r .8s linear infinite; }
+  @keyframes r { to { transform:rotate(360deg); } }
+  .ok { color:var(--green); font-weight:700; }
+  .bot { align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px; max-width:92%; }
+  .bot p { margin:0 0 10px; }
+  .bot p:last-child { margin:0; }
+  .part { opacity:0; transition:opacity .4s ease; }
+  .part.show { opacity:1; }
+  table { border-collapse:collapse; margin:4px 0 12px; font-size:15px; min-width:400px; }
+  th { text-align:left; color:var(--muted); font-weight:600; font-size:13px; padding:5px 18px 5px 0; border-bottom:1px solid var(--line); }
+  td { padding:5px 18px 5px 0; border-bottom:1px solid #f0eee9; font-variant-numeric:tabular-nums; }
+  td.pos { color:var(--green); font-weight:600; }
+  tr.part { transition:opacity .3s ease; }
+  .caret { display:inline-block; width:2px; height:18px; background:#fff; vertical-align:-3px; margin-left:1px; animation:b 1s steps(1) infinite; }
+  @keyframes b { 50% { opacity:0; } }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <div class="title"><span class="dot"></span>AI assistant + IBI Portfolio MCP</div>
+    <div class="badge">Demo data, not a real account</div>
+  </div>
+
+  <div class="msg user" id="q"><span id="qt"></span><span class="caret" id="caret"></span></div>
+
+  <div class="msg tool" id="tool"><span class="spin" id="spin"></span><span id="tooltext">Reading your IBI account (read-only)…</span></div>
+
+  <div class="msg bot" id="a">
+    <p class="part">Portfolio worth <b>$54,105</b>, up <b>$7,824</b> (about 19%) over what you paid. Most stocks are up, but Intel and Amazon are down.</p>
+    <table>
+      <tr class="part"><th>Stock</th><th>Worth</th><th>Profit</th></tr>
+      <tr class="part"><td>VOO</td><td>$11,909</td><td class="pos">+$1,896</td></tr>
+      <tr class="part"><td>AAPL</td><td>$9,156</td><td class="pos">+$2,306</td></tr>
+      <tr class="part"><td>MSFT</td><td>$8,139</td><td class="pos">+$1,616</td></tr>
+      <tr class="part"><td>TEVA</td><td>$5,685</td><td class="pos">+$1,425</td></tr>
+      <tr class="part"><td>NVDA</td><td>$4,961</td><td class="pos">+$1,510</td></tr>
+    </table>
+    <p class="part">Cash is <b>$4,820</b>, about 9% of the portfolio.</p>
+  </div>
+</div>
+<script>
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const $ = id => document.getElementById(id);
+  async function play() {
+    await sleep(600);
+    $("q").classList.add("show");
+    const text = "How is my IBI portfolio doing?";
+    for (const ch of text) { $("qt").textContent += ch; await sleep(55); }
+    await sleep(400); $("caret").remove();
+    await sleep(500);
+    $("tool").classList.add("show");
+    await sleep(2600);
+    $("spin").remove();
+    $("tooltext").innerHTML = '<span class="ok">✓</span> Read 8 positions and cash from IBI. No orders, no changes.';
+    await sleep(900);
+    $("a").classList.add("show");
+    for (const el of document.querySelectorAll(".part")) { await sleep(el.tagName === "TR" ? 260 : 650); el.classList.add("show"); }
+    window.demoDone = true;
+  }
+  play();
+</script>
+</body>
+</html>

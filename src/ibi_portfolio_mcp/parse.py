@@ -134,12 +134,12 @@ def summarize(positions: list[dict], cash: float | None) -> dict:
         r["weight_pct"] = round((r.get("market_value") or 0) / total * 100, 2) if total else None
     return {
         "currency": "USD",
-        "total_value": total,
-        "market_value": value,
+        "total_value": round(total, 2),
+        "market_value": round(value, 2),
         "cash": cash,
         "cash_pct": round((cash or 0) / total * 100, 2) if total else None,
-        "total_cost": cost,
-        "unrealized_pl": value - cost,
+        "total_cost": round(cost, 2),
+        "unrealized_pl": round(value - cost, 2),
         "unrealized_pl_pct": round((value / cost - 1) * 100, 2) if cost else None,
         "position_count": len(positions),
         "positions": positions,

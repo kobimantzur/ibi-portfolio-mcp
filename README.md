@@ -6,6 +6,20 @@
 
 Unofficial. Not affiliated with or endorsed by IBI.
 
+![Demo: asking an AI assistant "How is my IBI portfolio doing?" and getting a short answer with a table of the biggest positions](docs/demo.gif)
+
+*Demo with made-up numbers. The answer is a real reply from Claude.*
+
+## Set it up the easy way (no coding)
+
+You need a Mac and [Claude Code](https://claude.com/claude-code) (it is free to install and works with a Claude subscription). Open Claude Code and paste this:
+
+> Install https://github.com/kobimantzur/ibi-portfolio-mcp for me. Follow its README: save my IBI password in the macOS Keychain (let me type it myself, never ask me for it in the chat), connect it to Claude Desktop and Claude Code, then run the check.
+
+Claude does the setup and asks you to type your password once, into your Mac's Keychain prompt and not into the chat. After that, just ask *"How is my IBI portfolio doing?"* in Claude.
+
+Want to see it work first, without your account? Add `IBI_DEMO=1` to the setup and it answers with made-up numbers.
+
 ## What you get
 
 | Tool | What it returns |
@@ -17,6 +31,53 @@ Example questions once it is connected:
 - "What's my IBI portfolio worth and how much cash do I have?"
 - "Which 5 positions are the biggest, and what is the P/L on each?"
 - "What did I buy or sell this month?"
+
+<details>
+<summary><b>Example output</b> (what the AI receives, demo data)</summary>
+
+`get_portfolio`, shortened to 2 of 8 positions:
+
+```json
+{
+  "currency": "USD",
+  "total_value": 54105.1,
+  "market_value": 49284.75,
+  "cash": 4820.35,
+  "cash_pct": 8.91,
+  "total_cost": 41460.9,
+  "unrealized_pl": 7823.85,
+  "unrealized_pl_pct": 18.87,
+  "position_count": 8,
+  "positions": [
+    {
+      "symbol": "VOO", "qty": 22.0, "last_price": 541.3, "change_pct": 0.4,
+      "cost_price": 455.1, "market_value": 11908.6, "total_cost": 10012.2,
+      "todays_pl": 47.63, "unrealized_pl": 1896.4, "unrealized_pl_pct": 18.94, "weight_pct": 22.01
+    },
+    {
+      "symbol": "AAPL", "qty": 40.0, "last_price": 228.9, "change_pct": -0.6,
+      "cost_price": 171.25, "market_value": 9156.0, "total_cost": 6850.0,
+      "todays_pl": -54.94, "unrealized_pl": 2306.0, "unrealized_pl_pct": 33.66, "weight_pct": 16.92
+    }
+  ],
+  "balances": { "buying_power": 4820.35, "balance_usd": 4820.35 },
+  "fetched_at": "2026-10-27T14:05:12+00:00",
+  "source": "demo"
+}
+```
+
+`get_account_activity`, one row:
+
+```json
+{
+  "ref": "D-1003", "symbol": "NVDA", "side": "BUY", "status": "Filled", "order_type": "Limit",
+  "created_at": "2026-10-21T10:02:11", "executed_at": "2026-10-21T10:02:13",
+  "qty": 10.0, "exec_qty": 10.0, "limit_price": 135.0, "exec_price": 134.8,
+  "profit_loss": null, "commission": 2.5, "fees": null, "currency": "USD"
+}
+```
+
+</details>
 
 ## Read-only, on purpose
 
@@ -34,7 +95,7 @@ Your login gives full access to your account, so read [`scraper.py`](src/ibi_por
 - ✅ **IBI NextGen** (the US-stocks platform at `ibi.orbisfn.io`, English UI)
 - ❌ Other IBI platforms (for example the Israeli TASE trading site) are not supported yet. PRs welcome.
 
-## Install
+## Install by hand (for developers)
 
 You need Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
@@ -155,6 +216,7 @@ Restart the app after editing. If `uv` is not found, use its full path (`which u
 |---|---|---|
 | `IBI_USER` / `IBI_USER_CMD` | | Username, or a command that prints it |
 | `IBI_PASS` / `IBI_PASS_CMD` | | Password, or a command that prints it |
+| `IBI_DEMO` | `0` | `1` returns a made-up portfolio, no IBI login. For trying it out |
 | `IBI_ENV_FILE` | `./.env` | Extra env file to load |
 | `IBI_HEADED` | `0` | `1` shows the browser window (needed for SMS codes) |
 | `IBI_LOGIN_TIMEOUT_S` | `90` (`180` headed) | How long to wait for login |
