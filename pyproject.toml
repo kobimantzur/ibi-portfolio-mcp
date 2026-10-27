@@ -17,6 +17,7 @@ dependencies = [
   "mcp>=2.1",
   "playwright>=1.45",
   "python-dotenv>=1.0",
+  "keyring>=25",
 ]
 
 [project.urls]

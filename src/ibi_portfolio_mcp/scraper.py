@@ -86,9 +86,15 @@ def fetch(user: str, password: str, *, headed: bool = False, login_timeout_s: in
         try:
             browser = pw.chromium.launch(headless=not headed)
         except PWError as e:
-            if "Executable doesn't exist" in str(e):
-                raise IbiError("Chromium is not installed. Run: uv run playwright install chromium") from None
-            raise
+            if "Executable doesn't exist" not in str(e):
+                raise
+            # first run: fetch the browser once (stdout belongs to MCP, so its progress goes to stderr)
+            _log("browser missing, downloading it once (about 100 MB)")
+            import subprocess
+            r = subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], stdout=sys.stderr)
+            if r.returncode != 0:
+                raise IbiError("could not download the browser. Run: ibi-portfolio-mcp setup") from None
+            browser = pw.chromium.launch(headless=not headed)
         ctx = browser.new_context(viewport={"width": 1500, "height": 1000})
 
         def guard(route):

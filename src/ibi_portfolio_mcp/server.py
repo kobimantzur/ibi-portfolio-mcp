@@ -81,9 +81,27 @@ async def get_account_activity(limit: int = 50, refresh: bool = False) -> dict:
     return {"activity": rows[: max(1, limit)], "count": len(snap.orders), **_meta(snap)}
 
 
+USAGE = """ibi-portfolio-mcp: read-only IBI portfolio for AI assistants
+
+  ibi-portfolio-mcp setup      save your IBI login, test it, connect your AI apps
+  ibi-portfolio-mcp check      test the login and print a one-line summary
+  ibi-portfolio-mcp connect    connect your AI apps again
+  ibi-portfolio-mcp forget     remove the saved IBI login from this computer
+  ibi-portfolio-mcp            run the MCP server (your AI app does this)"""
+
+
 def main() -> None:
     load_env_file()
-    if len(sys.argv) > 1 and sys.argv[1] == "check":
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd in ("-h", "--help", "help"):
+        print(USAGE)
+        return
+    if cmd in ("setup", "connect", "forget"):
+        from . import setup
+        {"setup": setup.run_setup, "forget": setup.run_forget,
+         "connect": lambda: setup.connect_apps(setup.server_command())}[cmd]()
+        return
+    if cmd == "check":
         # terminal smoke test: logs in once and prints a short summary (no positions)
         try:
             snap = asyncio.run(_snapshot(True))

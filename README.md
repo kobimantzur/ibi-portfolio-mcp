@@ -1,8 +1,8 @@
 # ibi-portfolio-mcp
 
-**A read-only MCP server for IBI (Israel Brokerage & Investments, אי.בי.אי).** It lets Claude, ChatGPT, Cursor or any MCP client read your IBI portfolio (positions, cash, profit/loss and recent account activity) so you can ask things like *"how is my portfolio doing?"*. It **cannot buy, sell or move money**.
+**A read-only MCP server for IBI (Israel Brokerage & Investments, אי.בי.אי).** It lets Claude, ChatGPT, Cursor and other AI apps read your IBI portfolio (positions, cash, profit/loss and recent account activity) so you can ask things like *"how is my portfolio doing?"*. It **cannot buy, sell or move money**. Works on Mac and Windows.
 
-> 🇮🇱 שרת MCP לקריאה בלבד עבור חשבון המסחר שלך באי.בי.אי (IBI NextGen). הוא נותן ל-Claude או לכל עוזר AI אחר לראות את תיק ההשקעות שלך: אחזקות, מזומן, רווח והפסד ופעולות אחרונות. הוא לא יכול לבצע פקודות קנייה או מכירה. הסיסמה נשארת אצלך במחשב ולא מגיעה למודל.
+> 🇮🇱 שרת MCP לקריאה בלבד עבור חשבון המסחר שלך באי.בי.אי (IBI NextGen). הוא נותן ל-Claude, ל-ChatGPT או לכל עוזר AI אחר לראות את תיק ההשקעות שלך: אחזקות, מזומן, רווח והפסד ופעולות אחרונות. הוא לא יכול לבצע פקודות קנייה או מכירה. הסיסמה נשמרת רק במחשב שלך ולא מגיעה למודל. עובד על Mac ועל Windows.
 
 Unofficial. Not affiliated with or endorsed by IBI.
 
@@ -10,15 +10,69 @@ Unofficial. Not affiliated with or endorsed by IBI.
 
 *Demo with made-up numbers. The answer is a real reply from Claude.*
 
-## Set it up the easy way (no coding)
+## Which AI apps work
 
-You need a Mac and [Claude Code](https://claude.com/claude-code) (it is free to install and works with a Claude subscription). Open Claude Code and paste this:
+It runs on your own computer, so it works with AI apps installed on your computer. Website-only chats cannot reach it.
 
-> Install https://github.com/kobimantzur/ibi-portfolio-mcp for me. Follow its README: save my IBI password in the macOS Keychain (let me type it myself, never ask me for it in the chat), connect it to Claude Desktop and Claude Code, then run the check.
+| App | Mac | Windows | Notes |
+|---|---|---|---|
+| Claude Desktop | ✅ | ✅ | Connected for you by `setup` |
+| ChatGPT desktop app | ✅ | ✅ | Connected for you by `setup` (it uses the app's built-in Codex settings) |
+| Codex | ✅ | ✅ | Same settings as the ChatGPT desktop app |
+| Cursor | ✅ | ✅ | Connected for you by `setup` |
+| Claude Code | ✅ | ✅ | Connected for you by `setup` |
+| VS Code (Copilot), Windsurf, other MCP apps | ✅ | ✅ | Add it by hand, see [Connect by hand](#connect-by-hand) |
+| chatgpt.com, claude.ai, phone apps, Gemini | ❌ | ❌ | They run in the cloud and cannot start a program on your computer |
 
-Claude does the setup and asks you to type your password once, into your Mac's Keychain prompt and not into the chat. After that, just ask *"How is my IBI portfolio doing?"* in Claude.
+Linux works too if you are comfortable with a terminal.
 
-Want to see it work first, without your account? Add `IBI_DEMO=1` to the setup and it answers with made-up numbers.
+## Set it up (about 5 minutes)
+
+You will copy 3 lines into a terminal. The terminal is the "Terminal" app on Mac, and "PowerShell" from the Start menu on Windows.
+
+**1. Install uv** (a small free tool that installs Python programs).
+
+Mac:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Windows:
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then **close the terminal and open a new one**.
+
+**2. Install IBI Portfolio MCP:**
+```bash
+uv tool install https://github.com/kobimantzur/ibi-portfolio-mcp/archive/refs/heads/main.zip
+```
+
+**3. Run the guided setup:**
+```bash
+ibi-portfolio-mcp setup
+```
+
+It will:
+1. Ask for your IBI username and password. The password is hidden as you type and saved only in your computer's secure vault (Keychain on Mac, Credential Manager on Windows).
+2. Download the small browser it uses to read IBI (one time, about 100 MB).
+3. Test the login (about a minute).
+4. Connect the AI apps it finds. Say yes to the ones you use.
+
+**4. Restart your AI app** and ask: *"How is my IBI portfolio doing?"*
+
+### Prefer not to type commands?
+
+If you have [Claude Code](https://claude.com/claude-code) or Codex (built into the ChatGPT desktop app), paste this and it does steps 1 and 2 for you:
+
+> Install https://github.com/kobimantzur/ibi-portfolio-mcp for me with steps 1 and 2 of its README. Do not run `ibi-portfolio-mcp setup` yourself and never ask me for my IBI password in the chat. When you are done, tell me to run `ibi-portfolio-mcp setup` in my own terminal.
+
+Then run `ibi-portfolio-mcp setup` yourself, so you are the only one who types the password.
+
+### Try it with fake data first
+
+Want to see it work before using your account? Run `IBI_DEMO=1 ibi-portfolio-mcp check` (Mac) or `$env:IBI_DEMO=1; ibi-portfolio-mcp check` (Windows). It answers with a made-up portfolio and does not log in to IBI.
 
 ## What you get
 
@@ -88,135 +142,119 @@ Example questions once it is connected:
 | ❌ Transfers or withdrawals | Not in the code |
 | 🛡️ Network guard | Any non-GET request to an `order` / `trade` / `transfer` / `withdraw` / `deposit` URL is aborted, and the tool result tells you if that ever happened |
 
-Your login gives full access to your account, so read [`scraper.py`](src/ibi_portfolio_mcp/scraper.py) yourself before using this. It is about 200 lines.
+Your login gives full access to your account, so you (or a developer friend) can read [`scraper.py`](src/ibi_portfolio_mcp/scraper.py) before using this. It is about 200 lines.
 
 ## Which IBI accounts work
 
 - ✅ **IBI NextGen** (the US-stocks platform at `ibi.orbisfn.io`, English UI)
 - ❌ Other IBI platforms (for example the Israeli TASE trading site) are not supported yet. PRs welcome.
 
-## Install by hand (for developers)
-
-You need Python 3.11+ and [uv](https://docs.astral.sh/uv/).
-
-```bash
-git clone https://github.com/kobimantzur/ibi-portfolio-mcp
-cd ibi-portfolio-mcp
-uv sync
-uv run playwright install chromium
-```
-
-Then store your password (next section) and test it from a terminal:
-
-```bash
-uv run ibi-portfolio-mcp check
-# OK: 12 positions, total 48,210.55 USD, source json, 20 activity rows
-```
-
 ## Your IBI password (secrets)
 
 This is the part to get right, so here is exactly what happens.
 
-### What the server needs
+### What it needs
 
-Your IBI NextGen **username** (email or ID) and **password**, the same ones you type at `ibi.orbisfn.io`. IBI has no API and no read-only keys, so the server logs in the way you do: it opens a hidden Chrome window on your own computer and types them into IBI's real login page.
+Your IBI NextGen **username** (email or ID) and **password**, the same ones you type at `ibi.orbisfn.io`. IBI has no API and no read-only keys, so the server logs in the way you do: it opens a hidden browser on your own computer and types them into IBI's real login page.
 
 ### Where your password goes, and where it does not
 
 | | |
 |---|---|
-| ✅ Your computer | Read from your keychain, password manager or environment when a tool runs |
+| ✅ Your computer's secure vault | Keychain (Mac), Credential Manager (Windows), Secret Service (Linux) |
 | ✅ IBI's login page (`auth.ibi.co.il`) | Typed into the form, inside a local browser, over HTTPS |
 | ❌ The AI model / Anthropic / OpenAI | Never. Tools take no password argument and never return it |
+| ❌ AI app settings files | Not with `setup`: the apps only get the program's path, not your login |
 | ❌ Logs | Never printed. Errors from your password command are not echoed |
 | ❌ Disk | No cookies, tokens or sessions are saved. Each read is a fresh browser that is closed after |
 | ❌ Anyone else | No server, no telemetry. The code talks only to IBI |
 
 **What the AI does see:** your portfolio numbers. Whatever a tool returns goes to your AI provider like any other chat message. If that is not OK for you, do not connect this server.
 
-### Ways to give it the password (best first)
+### Ways to store the password (best first)
 
 | Option | How | Password stored as plain text? |
 |---|---|---|
-| 1. macOS Keychain ✅ recommended | `IBI_PASS_CMD` runs a command that prints the password | ❌ No |
-| 2. Password manager CLI ✅ | Same, with `op`, `bw`, `bws` and similar | ❌ No |
-| 3. MCP client config | `IBI_PASS` in the client's `env` block | ⚠️ Yes, in that config file |
+| 1. Computer's vault ✅ recommended | `ibi-portfolio-mcp setup` | ❌ No |
+| 2. Password manager ✅ | `IBI_PASS_CMD`: a command that prints the password | ❌ No |
+| 3. AI app settings | `IBI_PASS` in the app's `env` block | ⚠️ Yes, in that settings file |
 | 4. `.env` file | `IBI_PASS` in a `.env` file (gitignored) | ⚠️ Yes, in that file |
 
-**Option 1: macOS Keychain.** Save it once (it asks for the password, so it never lands in your shell history):
+If several are set, the order is: `IBI_USER` / `IBI_PASS`, then `IBI_USER_CMD` / `IBI_PASS_CMD`, then the vault.
 
-```bash
-security add-generic-password -s ibi-portfolio-mcp -a ibi -w
-```
-
-Then set:
+**Option 2: password manager.** Any command that prints only the password:
 
 ```
-IBI_USER=your-email-or-id
-IBI_PASS_CMD=security find-generic-password -s ibi-portfolio-mcp -a ibi -w
-```
-
-The first time it runs, macOS may ask whether to allow access. Choose "Always Allow".
-
-**Option 2: password manager.** Any command that prints only the password works:
-
-```
-IBI_PASS_CMD=op read op://Private/IBI/password          # 1Password CLI
-IBI_PASS_CMD=bw get password ibi.orbisfn.io             # Bitwarden CLI (vault must be unlocked)
-IBI_PASS_CMD=secret-tool lookup service ibi             # Linux keyring
+IBI_PASS_CMD=op read op://Private/IBI/password          # 1Password
+IBI_PASS_CMD=bw get password ibi.orbisfn.io             # Bitwarden (vault must be unlocked)
 ```
 
 `IBI_USER_CMD` works the same way for the username.
 
-**Options 3 and 4.** `IBI_PASS` set directly. Simple, but the password sits in a plain file: keep that file private (`chmod 600`) and never commit it. `.env` is already in `.gitignore`. The server loads `.env` from the folder it starts in, or the file named in `IBI_ENV_FILE`. Real environment variables win over the file.
+**Options 3 and 4** put the password in a plain file. Keep that file private and never share or commit it. The server loads `.env` from the folder it starts in, or the file named in `IBI_ENV_FILE`.
+
+### Change or remove the saved login
+
+```bash
+ibi-portfolio-mcp forget     # removes it from the vault
+ibi-portfolio-mcp setup      # saves a new one
+```
 
 ### SMS code (two-factor)
 
-If IBI asks for a one-time code, the tool returns an `IbiOtpRequired` error. Set `IBI_HEADED=1`: a visible browser window opens, the server fills in your username and password, and you type the code yourself. You get 3 minutes.
+If IBI asks for a one-time code, the tool returns an `IbiOtpRequired` error. Set `IBI_HEADED=1` (in the app's `env` block, or in the terminal before `check`): a visible browser window opens, the server fills in your username and password, and you type the code yourself. You get 3 minutes.
 
 ### If you think your password leaked
 
-Change it at IBI. Then update your keychain entry or config.
+Change it at IBI, then run `ibi-portfolio-mcp setup` again.
 
-## Connect it to your AI app
+## Connect by hand
 
-All examples use the Keychain setup above. Replace `/path/to/ibi-portfolio-mcp` with where you cloned it.
+`setup` does this for you. Use this section for other apps, or if you prefer editing settings yourself.
 
-**Claude Code**
+First get the program's full path: `which ibi-portfolio-mcp` (Mac) or `where.exe ibi-portfolio-mcp` (Windows). Below it is `PATH_TO/ibi-portfolio-mcp`.
 
-```bash
-claude mcp add --scope user ibi-portfolio \
-  -e IBI_USER=your-email-or-id \
-  -e 'IBI_PASS_CMD=security find-generic-password -s ibi-portfolio-mcp -a ibi -w' \
-  -- uv run --directory /path/to/ibi-portfolio-mcp ibi-portfolio-mcp
-```
-
-**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`), **Cursor** (`~/.cursor/mcp.json`) and most other clients:
+**Claude Desktop, Cursor, VS Code, Windsurf and most apps** (JSON). Claude Desktop's file is `~/Library/Application Support/Claude/claude_desktop_config.json` on Mac and `%APPDATA%\Claude\claude_desktop_config.json` on Windows; Cursor's is `~/.cursor/mcp.json`.
 
 ```json
 {
   "mcpServers": {
     "ibi-portfolio": {
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/ibi-portfolio-mcp", "ibi-portfolio-mcp"],
-      "env": {
-        "IBI_USER": "your-email-or-id",
-        "IBI_PASS_CMD": "security find-generic-password -s ibi-portfolio-mcp -a ibi -w"
-      }
+      "command": "PATH_TO/ibi-portfolio-mcp",
+      "args": []
     }
   }
 }
 ```
 
-Restart the app after editing. If `uv` is not found, use its full path (`which uv`).
+On Windows, write the path with double backslashes, for example `"C:\\Users\\you\\.local\\bin\\ibi-portfolio-mcp.exe"`.
+
+**ChatGPT desktop app and Codex** (`~/.codex/config.toml`, or in the app: Settings → MCP servers). Raise the tool timeout: a fresh IBI read takes about a minute and the default is 60 seconds.
+
+```toml
+[mcp_servers.ibi-portfolio]
+command = 'PATH_TO/ibi-portfolio-mcp'
+startup_timeout_sec = 30
+tool_timeout_sec = 300
+```
+
+**Claude Code:**
+
+```bash
+claude mcp add --scope user ibi-portfolio -- PATH_TO/ibi-portfolio-mcp
+```
+
+Restart the app after any change.
 
 ## Settings
 
+Set these in the app's `env` block or in the terminal. All are optional.
+
 | Variable | Default | What it does |
 |---|---|---|
-| `IBI_USER` / `IBI_USER_CMD` | | Username, or a command that prints it |
-| `IBI_PASS` / `IBI_PASS_CMD` | | Password, or a command that prints it |
 | `IBI_DEMO` | `0` | `1` returns a made-up portfolio, no IBI login. For trying it out |
+| `IBI_USER` / `IBI_USER_CMD` | vault | Username, or a command that prints it |
+| `IBI_PASS` / `IBI_PASS_CMD` | vault | Password, or a command that prints it |
 | `IBI_ENV_FILE` | `./.env` | Extra env file to load |
 | `IBI_HEADED` | `0` | `1` shows the browser window (needed for SMS codes) |
 | `IBI_LOGIN_TIMEOUT_S` | `90` (`180` headed) | How long to wait for login |
@@ -226,29 +264,36 @@ Restart the app after editing. If `uv` is not found, use its full path (`which u
 ## How it works
 
 1. A tool is called. If the last read is newer than `IBI_CACHE_SECONDS`, it is returned as is.
-2. Otherwise a fresh headless Chromium opens `ibi.orbisfn.io` and logs in with your credentials.
-3. The IBI web app loads your data from its own backend. The server keeps a copy of those JSON responses (portfolio, balance, latest activity) and reads the page as a fallback.
+2. Otherwise a fresh hidden browser opens `ibi.orbisfn.io` and logs in with your saved login.
+3. The IBI web app loads your data from its own backend. The server keeps a copy of those responses (portfolio, balance, latest activity) and reads the page as a fallback.
 4. The browser is closed and the numbers are returned. Nothing is written to disk.
 
 A read takes about 30 to 60 seconds. If IBI changes its website this can break; open an issue with the error text (never paste your password or screenshots with your balances).
 
 ## Troubleshooting
 
-| Error | Fix |
+| Problem | Fix |
 |---|---|
-| `MissingCredentials` | `IBI_USER` and `IBI_PASS` / `IBI_PASS_CMD` are not reaching the server. Put them in the client's `env` block |
+| `ibi-portfolio-mcp: command not found` | Close and reopen the terminal. Still missing: run `uv tool update-shell`, then reopen |
+| The app does not show the IBI tools | Restart the app fully (quit it, not just close the window) |
+| ChatGPT / Codex says the tool timed out | Set `tool_timeout_sec = 300` (see [Connect by hand](#connect-by-hand)). `setup` does this for you |
+| `MissingCredentials` | Run `ibi-portfolio-mcp setup` |
 | `IBI_PASS_CMD failed` | Run that command in a terminal; it must print only the password |
 | `IbiOtpRequired` | Set `IBI_HEADED=1` and type the SMS code in the window |
-| `login did not reach the IBI home page` | Wrong username or password, or IBI shows a notice. Try `IBI_HEADED=1` to watch |
-| `Executable doesn't exist` | Run `uv run playwright install chromium` |
+| `login did not reach the IBI home page` | Wrong username or password, or IBI shows a notice. Try `IBI_HEADED=1 ibi-portfolio-mcp check` to watch |
+| Update to the latest version | `uv tool install --force https://github.com/kobimantzur/ibi-portfolio-mcp/archive/refs/heads/main.zip` |
 
-## Development
+## For developers
 
 ```bash
+git clone https://github.com/kobimantzur/ibi-portfolio-mcp
+cd ibi-portfolio-mcp
+uv sync
 uv run pytest -q
+uv run ibi-portfolio-mcp check      # needs a saved login, or IBI_DEMO=1
 ```
 
-Tests use made-up numbers only. Never commit real account data.
+Tests use made-up numbers only. Never commit real account data. To re-record the demo GIF: `uv run python docs/demo/record.py`.
 
 ## Disclaimer
 
