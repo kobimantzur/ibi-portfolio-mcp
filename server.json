@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.kobimantzur/ibi-portfolio-mcp",
+  "title": "IBI Portfolio (Israel)",
+  "description": "Read-only IBI (Israel Brokerage) portfolio for AI apps: positions, cash, P/L. Login stays local.",
+  "repository": {
+    "url": "https://github.com/kobimantzur/ibi-portfolio-mcp",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "ibi-portfolio-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

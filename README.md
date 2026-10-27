@@ -1,12 +1,14 @@
 # ibi-portfolio-mcp
 
+<!-- mcp-name: io.github.kobimantzur/ibi-portfolio-mcp -->
+
 **A read-only MCP server for IBI (Israel Brokerage & Investments, אי.בי.אי).** It lets Claude, ChatGPT, Cursor and other AI apps read your IBI portfolio (positions, cash, profit/loss and recent account activity) so you can ask things like *"how is my portfolio doing?"*. It **cannot buy, sell or move money**. Works on Mac and Windows.
 
 > 🇮🇱 שרת MCP לקריאה בלבד עבור חשבון המסחר שלך באי.בי.אי (IBI NextGen). הוא נותן ל-Claude, ל-ChatGPT או לכל עוזר AI אחר לראות את תיק ההשקעות שלך: אחזקות, מזומן, רווח והפסד ופעולות אחרונות. הוא לא יכול לבצע פקודות קנייה או מכירה. הסיסמה נשמרת רק במחשב שלך ולא מגיעה למודל. עובד על Mac ועל Windows.
 
 Unofficial. Not affiliated with or endorsed by IBI.
 
-![Demo: asking an AI assistant "How is my IBI portfolio doing?" and getting a short answer with a table of the biggest positions](docs/demo.gif)
+![Demo: asking an AI assistant "How is my IBI portfolio doing?" and getting a short answer with a table of the biggest positions](https://raw.githubusercontent.com/kobimantzur/ibi-portfolio-mcp/main/docs/demo.gif)
 
 *Demo with made-up numbers. The answer is a real reply from Claude.*
 
@@ -34,7 +36,7 @@ Your IBI login gives full access to your money, so this is the most important pa
 
 **What it cannot protect you from**
 - ⚠️ Someone who can use your unlocked computer, or malware on it, could read your portfolio the same way. Keep your computer locked and updated.
-- ⚠️ This is an unofficial tool. Before trusting it with your login, read the code yourself (about 750 lines, [start with scraper.py](src/ibi_portfolio_mcp/scraper.py)) or ask an AI to review it for you.
+- ⚠️ This is an unofficial tool. Before trusting it with your login, read the code yourself (about 750 lines, [start with scraper.py](https://github.com/kobimantzur/ibi-portfolio-mcp/blob/main/src/ibi_portfolio_mcp/scraper.py)) or ask an AI to review it for you.
 
 **Remove it anytime**
 - `ibi-portfolio-mcp forget` deletes the saved login from your vault.
@@ -175,7 +177,7 @@ Example questions once it is connected:
 | ❌ Transfers or withdrawals | Not in the code |
 | 🛡️ Network guard | Any non-GET request to an `order` / `trade` / `transfer` / `withdraw` / `deposit` URL is aborted, and the tool result tells you if that ever happened |
 
-Your login gives full access to your account, so you (or a developer friend) can read [`scraper.py`](src/ibi_portfolio_mcp/scraper.py) before using this. It is about 200 lines.
+Your login gives full access to your account, so you (or a developer friend) can read [`scraper.py`](https://github.com/kobimantzur/ibi-portfolio-mcp/blob/main/src/ibi_portfolio_mcp/scraper.py) before using this. It is about 200 lines.
 
 ## Which IBI accounts work
 

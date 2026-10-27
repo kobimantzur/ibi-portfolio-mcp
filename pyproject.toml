@@ -1,6 +1,6 @@
 [project]
 name = "ibi-portfolio-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Read-only MCP server for IBI (Israel Brokerage & Investments) portfolios: positions, cash, P/L and account activity for Claude, ChatGPT, Cursor and other AI assistants."
 readme = "README.md"
 license = "MIT"
@@ -35,3 +35,6 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["docs/", ".env*", "!.env.example", "dist/"]

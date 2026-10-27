@@ -1,0 +1,90 @@
+# Publishes a GitHub release to PyPI and the official MCP Registry.
+# No passwords or tokens are stored: both use GitHub's short-lived OIDC identity
+# (PyPI "trusted publishing" and mcp-publisher "github-oidc").
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - run: uv run pytest -q
+
+      - name: Versions match (pyproject, server.json, release tag)
+        run: |
+          set -euo pipefail
+          py=$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)
+          sj=$(jq -r .version server.json)
+          pk=$(jq -r '.packages[0].version' server.json)
+          echo "pyproject=$py server.json=$sj package=$pk tag=${GITHUB_REF_NAME}"
+          [ "$py" = "$sj" ] && [ "$py" = "$pk" ]
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then [ "v$py" = "${GITHUB_REF_NAME}" ]; fi
+
+  pypi:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ibi-portfolio-mcp
+    permissions:
+      id-token: write   # PyPI trusted publishing
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv build
+      - run: uv publish --trusted-publishing always
+
+  mcp-registry:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # MCP Registry github-oidc login
+      contents: read
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.1
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Wait until PyPI serves this version (the registry checks it)
+        run: |
+          set -euo pipefail
+          v=$(jq -r .version server.json)
+          for i in $(seq 1 30); do
+            if curl -fsS "https://pypi.org/pypi/ibi-portfolio-mcp/$v/json" >/dev/null; then echo "PyPI has $v"; exit 0; fi
+            sleep 10
+          done
+          echo "PyPI never served $v"; exit 1
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
+        run: |
+          set -euo pipefail
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          archive="mcp-publisher_${os}_${arch}.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
+
+      - run: ./mcp-publisher login github-oidc
+      - run: ./mcp-publisher publish
