@@ -26,6 +26,13 @@ mcp = MCPServer(
     ),
 )
 
+def redact(text: str, *secrets: str) -> str:
+    for s in secrets:
+        if s:
+            text = text.replace(s, "***")
+    return text
+
+
 _cache: dict[str, object] = {"at": 0.0, "snap": None}
 _lock = asyncio.Lock()
 
@@ -39,12 +46,17 @@ async def _snapshot(refresh: bool) -> Snapshot:
             from .demo import demo_snapshot
             return demo_snapshot()
         user, password = get_credentials()
-        snap = await asyncio.to_thread(
-            fetch, user, password,
-            headed=os.getenv("IBI_HEADED", "") in ("1", "true", "yes"),
-            login_timeout_s=int(os.getenv("IBI_LOGIN_TIMEOUT_S", "180" if os.getenv("IBI_HEADED") else "90")),
-            debug_dir=os.getenv("IBI_DEBUG_DIR") or None,
-        )
+        try:
+            snap = await asyncio.to_thread(
+                fetch, user, password,
+                headed=os.getenv("IBI_HEADED", "") in ("1", "true", "yes"),
+                login_timeout_s=int(os.getenv("IBI_LOGIN_TIMEOUT_S", "180" if os.getenv("IBI_HEADED") else "90")),
+                debug_dir=os.getenv("IBI_DEBUG_DIR") or None,
+            )
+        except Exception as e:  # noqa: BLE001
+            # error text goes to the AI: make sure it can never carry the login, whatever raised it
+            raise IbiError(redact(f"{type(e).__name__}: {e}" if not isinstance(e, IbiError) else str(e),
+                                  user, password)[:1500]) from None
         _cache.update(at=time.time(), snap=snap)
         return snap
 

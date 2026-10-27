@@ -10,6 +10,39 @@ Unofficial. Not affiliated with or endorsed by IBI.
 
 *Demo with made-up numbers. The answer is a real reply from Claude.*
 
+## How it is secured
+
+Your IBI login gives full access to your money, so this is the most important part.
+
+**Your password**
+- 🔒 It is saved only in your computer's own secure vault: Keychain on Mac, Credential Manager on Windows. Both are encrypted by your operating system. It is never saved in a file.
+- 🔒 It is typed only into IBI's real login page (`auth.ibi.co.il`), over HTTPS, inside a hidden browser on your own computer.
+- 🔒 It is never sent to the AI. The AI cannot ask for it: no tool takes a password, and no tool returns one.
+- 🔒 Your AI app's settings hold only the location of the program, not your username or password.
+- 🔒 It is never written to logs, and error messages are cleaned of your username and password before the AI sees them (there is a test for this).
+
+**Your account**
+- 🛡️ Read-only. There is no code to buy, sell, cancel or transfer anything.
+- 🛡️ The only things it clicks are the Login button, the login form's submit button and the "Latest Account Activity" tab.
+- 🛡️ A second safety net: a built-in guard blocks any request sent to an order, trade, transfer, deposit or withdrawal address, even if IBI's website tried to send one, and tells you if it ever had to.
+- 🛡️ It does not collect your account number, your name or your personal details.
+
+**Your data**
+- 🏠 Everything runs on your computer. There is no server of ours, no sign-up, no tracking and no analytics. When it reads your portfolio, it opens only IBI's website, which loads exactly as it does in your own browser. (Installing downloads the program and its browser once, from GitHub, PyPI and Microsoft's Playwright servers.)
+- 🧹 Nothing is kept on disk: each read opens a fresh browser and closes it after, with no cookies, tokens or sessions saved. The last result stays in memory for 5 minutes, then it is gone.
+- 👀 What the AI does see: your portfolio numbers (positions, values, cash, profit/loss, recent activity). They go to your AI company like any other chat message, under its privacy policy.
+
+**What it cannot protect you from**
+- ⚠️ Someone who can use your unlocked computer, or malware on it, could read your portfolio the same way. Keep your computer locked and updated.
+- ⚠️ This is an unofficial tool. Before trusting it with your login, read the code yourself (about 750 lines, [start with scraper.py](src/ibi_portfolio_mcp/scraper.py)) or ask an AI to review it for you.
+
+**Remove it anytime**
+- `ibi-portfolio-mcp forget` deletes the saved login from your vault.
+- `uv tool uninstall ibi-portfolio-mcp` removes the program.
+- Changing your IBI password also stops it from logging in.
+
+> 🇮🇱 **בקצרה:** הסיסמה נשמרת רק בכספת המוצפנת של המחשב שלך (Keychain / Credential Manager) ולא נשלחת אף פעם ל-AI. הכלי רק קורא נתונים: אין בו קוד לקנייה, מכירה או העברת כסף, ויש חסימה מובנית לכל בקשה כזו. הכל רץ אצלך במחשב, בלי שרת ובלי מעקב. ה-AI רואה רק את מספרי התיק (אחזקות, שווי, מזומן, רווח והפסד).
+
 ## Which AI apps work
 
 It runs on your own computer, so it works with AI apps installed on your computer. Website-only chats cannot reach it.

@@ -54,3 +54,21 @@ def test_vault_used_when_env_empty(monkeypatch):
         monkeypatch.delenv(v, raising=False)
     monkeypatch.setattr(credentials, "_from_vault", lambda key: {"username": "u", "password": "p"}[key])
     assert credentials.get_credentials() == ("u", "p")
+
+
+def test_errors_never_carry_the_login(monkeypatch):
+    import asyncio
+
+    from ibi_portfolio_mcp import server
+
+    def boom(user, password, **kw):
+        raise RuntimeError(f'Locator.fill("{password}") failed for {user}')
+
+    monkeypatch.delenv("IBI_DEMO", raising=False)
+    monkeypatch.setenv("IBI_USER", "someone@example.com")
+    monkeypatch.setenv("IBI_PASS", "Sup3r-Secret!")
+    monkeypatch.setattr(server, "fetch", boom)
+    server._cache.update(at=0.0, snap=None)
+    out = asyncio.run(server.get_portfolio(refresh=True))
+    assert "Sup3r-Secret!" not in str(out) and "someone@example.com" not in str(out)
+    assert out["kind"] == "IbiError" and "***" in out["error"]
